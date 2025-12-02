@@ -34,16 +34,7 @@ impl FromStr for IdRange {
     }
 }
 
-pub fn part1(input: &String) -> Result<u64, String> {
-    let is_invalid_id = |id: &u64| {
-        let id_str = id.to_string();
-
-        let first_part = id_str[..(id_str.len() / 2)].to_string();
-        let second_part = id_str[(id_str.len() / 2)..].to_string();
-
-        return first_part == second_part;
-    };
-
+fn sum_all_invalid_ids(input: &String, is_invalid_id: fn(&u64) -> bool) -> Result<u64, String> {
     let range_invalid_id_sum = |range_str: &str|
         range_str
             .parse::<IdRange>()
@@ -56,6 +47,73 @@ pub fn part1(input: &String) -> Result<u64, String> {
         .sum();
 }
 
+pub fn part1(input: &String) -> Result<u64, String> {
+    let is_invalid_id = |id: &u64| {
+        let id_str = id.to_string();
+
+        let first_part = id_str[..(id_str.len() / 2)].to_string();
+        let second_part = id_str[(id_str.len() / 2)..].to_string();
+
+        return first_part == second_part;
+    };
+
+    sum_all_invalid_ids(input, is_invalid_id)
+}
+
+
+fn is_chunk_invalid(id: &u64, chunk_size: u32) -> bool {
+    let multiplier: u64 = (10 as u64).pow(chunk_size as u32);
+    let mut id_leftover = id.clone();
+    let mut check_against: Option<u64> = None;
+
+    if id_leftover.checked_div(multiplier) == Some(0) {
+        return false;
+    }
+
+    while id_leftover > 0 {
+        let current_number = id_leftover
+            .checked_rem(multiplier)
+            .unwrap_or(0);
+
+        check_against = match check_against {
+            Some(val) => {
+                if val != current_number {
+                    return false;
+                }
+                Some(current_number)
+            },
+            None => Some(current_number),
+        };
+
+        id_leftover = id_leftover
+            .checked_div(multiplier)
+            .unwrap_or(0);
+        }
+
+    return true;
+}
+
+pub fn part2(input: &String) -> Result<u64, String> {
+    let is_invalid_id = |id: &u64| -> bool {
+        let id_str = id.to_string();
+
+        for chunk_size in 1..=(id_str.len() / 2) {
+            if id_str.len() % chunk_size != 0 {
+                continue;
+            }
+            
+            if is_chunk_invalid(id, chunk_size as u32) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    sum_all_invalid_ids(input, is_invalid_id)
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -65,5 +123,10 @@ mod tests {
     #[test]
     fn part1_example() {
         assert_eq!(part1(&EXAMPLE_INPUT.to_owned()), Ok(1227775554));
+    }
+
+    #[test]
+    fn part2_example() {
+        assert_eq!(part2(&EXAMPLE_INPUT.to_owned()), Ok(4174379265));
     }
 }
