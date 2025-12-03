@@ -9,7 +9,9 @@ fn main() {
         .expect("failed to read input");
 
     let answer1 = day03::part1(&input).expect("part 1 failed");
+    let answer2 = day03::part2(&input).expect("part 2 failed");
 
     println!("Part 1: {answer1}");
+    println!("Part 2: {answer2}");
 }
 
