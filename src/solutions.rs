@@ -1,3 +1,5 @@
 #[allow(dead_code)]
-pub mod day1;
-pub mod day2;
+pub mod day01;
+#[allow(dead_code)]
+pub mod day02;
+pub mod day03;
